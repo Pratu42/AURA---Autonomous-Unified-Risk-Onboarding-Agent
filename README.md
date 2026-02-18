@@ -6,7 +6,6 @@ AI-powered Risk-Based Onboarding System
 - Trust Index calculation
 - Fraud signal detection
 - OTP verification
-- Manual review escalation
 - Domain clustering detection
 
 # Tech Stack
