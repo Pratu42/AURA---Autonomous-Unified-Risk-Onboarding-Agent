@@ -221,7 +221,7 @@ function submitDetails(){
     activateStage(2);
     updateProgress(30,"Step 2 of 4 – OTP Verification");
 
-    fetch("https://aura-backend-m5me.onrender.com",{
+    fetch("https://aura-backend-1-5djd.onrender.com",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -248,7 +248,7 @@ function submitDetails(){
 
 function verifyOTP(){
 
-    fetch("https://aura-backend-m5me.onrender.com",{
+    fetch("https://aura-backend-1-5djd.onrender.com",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -374,4 +374,5 @@ function exitApp(){
 
 </body>
 </html>
+
 
