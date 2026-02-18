@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AURA - Autonomous Unified Risk & Onboarding Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+
+body{
+    margin:0;
+    background:radial-gradient(circle at top left,#0b1c2d,#08121c 60%);
+    color:#e6f1ff;
+    display:flex;
+    justify-content:center;
+    padding:40px;
+}
+
+.wrapper{width:100%;max-width:1000px;}
+
+.glass{
+    background:#162534;
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 30px 80px rgba(0,0,0,0.6);
+}
+
+h1{text-align:center;color:#22d3ee;margin-bottom:20px;}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border-radius:8px;
+    border:none;
+    background:#0f1f2e;
+    color:white;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(90deg,#00f5a0,#00d9f5);
+    color:#001219;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.secondary{
+    background:#334155;
+    color:white;
+    margin-left:10px;
+}
+
+button:hover{opacity:0.9;}
+
+.hidden{display:none;}
+
+.alert{color:#ef4444;font-weight:bold;}
+.warning{color:#facc15;font-weight:bold;}
+.success{color:#00f5a0;font-weight:bold;}
+
+.hint{font-size:13px;margin-bottom:5px;}
+
+.progress-container{margin:20px 0;}
+.progress-bar{
+    height:8px;
+    background:#0f1f2e;
+    border-radius:10px;
+    overflow:hidden;
+}
+.progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#00f5a0,#00d9f5);
+    transition:0.5s ease;
+}
+#progressText{margin-top:8px;font-size:13px;opacity:0.8;}
+
+.pipeline{
+    display:flex;
+    justify-content:space-between;
+    margin:20px 0;
+}
+
+.stage{text-align:center;flex:1;}
+
+.circle{
+    width:40px;height:40px;
+    border-radius:50%;
+    background:#0f1f2e;
+    color:#00d9f5;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+}
+
+.stage.active .circle{
+    background:linear-gradient(135deg,#00f5a0,#00d9f5);
+    color:#001219;
+    box-shadow:0 0 15px rgba(0,217,245,0.6);
+}
+
+.risk-box{
+    background:#0f1f2e;
+    padding:20px;
+    border-radius:15px;
+    margin-top:15px;
+}
+
+.signal-box{
+    background:#08121c;
+    padding:10px;
+    border-radius:10px;
+    margin-top:10px;
+    font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+<div class="glass">
+
+<h1>AURA – Autonomous Unified Risk & Onboarding Agent</h1>
+
+<div class="progress-container">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div id="progressText">Step 1 of 4 – Customer Details</div>
+</div>
+
+<div class="pipeline">
+    <div class="stage active" id="stage1"><div class="circle">1</div><div>Details</div></div>
+    <div class="stage" id="stage2"><div class="circle">2</div><div>OTP</div></div>
+    <div class="stage" id="stage3"><div class="circle">3</div><div>Risk</div></div>
+    <div class="stage" id="stage4"><div class="circle">4</div><div>Complete</div></div>
+</div>
+
+<!-- STEP 1 -->
+<div id="step1">
+    <input id="name" placeholder="Full Name" oninput="validateName()">
+    <div id="nameHint" class="hint"></div>
+
+    <input id="email" placeholder="Email" oninput="validateEmail()">
+    <div id="emailHint" class="hint"></div>
+
+    <input id="id_number" placeholder="Government ID (10 characters)">
+    <input id="country" placeholder="Country">
+
+    <label style="margin-top:10px;font-weight:bold;">
+        Upload Government ID (KYC Document)
+    </label>
+    <input type="file" id="docUpload">
+    <div id="docStatus" class="hint"></div>
+
+    <button onclick="submitDetails()">Continue</button>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2" class="hidden"></div>
+
+<!-- STEP 3 -->
+<div id="step3" class="hidden"></div>
+
+<!-- STEP 4 -->
+<div id="step4" class="hidden"></div>
+
+</div>
+</div>
+
+<script>
+
+function updateProgress(percent,text){
+    progressFill.style.width = percent + "%";
+    progressText.innerText = text;
+}
+
+function activateStage(num){
+    document.querySelectorAll(".stage").forEach(s=>s.classList.remove("active"));
+    document.getElementById("stage"+num).classList.add("active");
+}
+
+function validateName(){
+    if(name.value.length<3){
+        nameHint.innerHTML="Name too short";
+        nameHint.style.color="orange";
+    } else {
+        nameHint.innerHTML="Valid name ✓";
+        nameHint.style.color="#00f5a0";
+    }
+}
+
+function validateEmail(){
+    if(!email.value.includes("@")){
+        emailHint.innerHTML="Invalid email";
+        emailHint.style.color="orange";
+    } else {
+        emailHint.innerHTML="Valid email ✓";
+        emailHint.style.color="#00f5a0";
+    }
+}
+
+docUpload.addEventListener("change",function(){
+    docStatus.innerHTML="Running AI document validation...";
+    docStatus.style.color="orange";
+    setTimeout(()=>{
+        docStatus.innerHTML="✔ Document verified & OCR extracted";
+        docStatus.style.color="#00f5a0";
+    },1500);
+});
+
+function submitDetails(){
+
+    activateStage(2);
+    updateProgress(30,"Step 2 of 4 – OTP Verification");
+
+    fetch("/submit_profile",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            name:name.value,
+            email:email.value,
+            id_number:id_number.value,
+            country:country.value
+        })
+    })
+    .then(res=>res.json())
+    .then(()=>{
+
+        step1.classList.add("hidden");
+        step2.classList.remove("hidden");
+
+        step2.innerHTML=`
+            <h3>OTP Verification</h3>
+            <input id="otp" placeholder="Enter OTP">
+            <button onclick="verifyOTP()">Verify OTP</button>
+            <div id="otpMsg"></div>
+        `;
+    });
+}
+
+function verifyOTP(){
+
+    fetch("/verify_otp",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            email:email.value,
+            otp:otp.value
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+
+        if(data.status!=="success"){
+            otpMsg.innerHTML=
+              `<div class="alert">Invalid OTP (Attempts: ${data.attempts || 0})</div>`;
+            return;
+        }
+
+        activateStage(3);
+        updateProgress(75,"Step 3 of 4 – AI Risk Evaluation");
+
+        step2.classList.add("hidden");
+        step3.classList.remove("hidden");
+
+        let trust=data.trust_index;
+        let color="#00f5a0";
+        if(trust<70) color="#facc15";
+        if(trust<40) color="#ef4444";
+
+        let signalsHTML="";
+        if(data.signals.length>0){
+            signalsHTML="<div class='signal-box'><b>Triggered Signals:</b><ul>";
+            data.signals.forEach(s=>{
+                signalsHTML+=`<li>${s}</li>`;
+            });
+            signalsHTML+="</ul></div>";
+        }
+
+        let fraudAlert="";
+        if(data.fraud_alert){
+            fraudAlert=`<div class="alert">${data.fraud_alert}</div>`;
+        }
+
+        let action="";
+
+        if(data.account_status==="activated"){
+            action=`<button onclick="activateAccount()">Activate Account</button>`;
+        }
+        else if(data.account_status==="pending"){
+            action=`
+                <div class="warning">EDD Required – Under Manual Review</div>
+                <button class="secondary" onclick="restart()">Exit</button>
+            `;
+        }
+        else{
+            action=`
+        	<div class="alert">High Risk – Account Blocked</div>
+        	<p>You may restart the application or exit safely.</p>
+        	<button onclick="restart()">Start New Application</button>
+        	<button class="secondary" onclick="exitApp()">Exit</button>
+    	    `;
+        }
+
+
+        step3.innerHTML=`
+            <div class="risk-box">
+                <h2 style="color:${color}">Trust Index: ${trust}%</h2>
+                <p><b>Risk Score:</b> ${data.risk_score}</p>
+                <p><b>Risk Category:</b> ${data.risk_category}</p>
+                <p><b>Decision:</b> ${data.decision}</p>
+                <p><b>AI Explanation:</b> ${data.explanation}</p>
+                <p><b>Confidence Score:</b> ${data.confidence_score}%</p>
+                <p><b>Audit Timestamp:</b> ${data.audit_log.timestamp}</p>
+                ${fraudAlert}
+                ${signalsHTML}
+                ${action}
+            </div>
+        `;
+    });
+}
+
+function activateAccount(){
+    activateStage(4);
+    updateProgress(100,"Onboarding Complete");
+
+    step3.classList.add("hidden");
+    step4.classList.remove("hidden");
+
+    step4.innerHTML=`
+        <div class="risk-box">
+            <h2 class="success">🎉 Account Activated Successfully</h2>
+            <p>Welcome to AURA Secure Banking.</p>
+            <button onclick="goToDashboard()">Go to Dashboard</button>
+            <button class="secondary" onclick="restart()">Start New Application</button>
+        </div>
+    `;
+}
+function goToDashboard(){
+    step4.innerHTML = `
+        <div class="risk-box">
+            <h2>Welcome Dashboard</h2>
+            <p><b>Account Status:</b> Active</p>
+            <p><b>Trust Score:</b> Verified</p>
+            <p><b>Risk Level:</b> Low</p>
+            <button onclick="restart()">Logout</button>
+        </div>
+    `;
+}
+
+function restart(){
+    location.reload();
+}
+function exitApp(){
+    document.body.innerHTML = `
+        <div style="text-align:center;margin-top:100px;">
+            <h2>Thank you for using AURA</h2>
+            <p>Your session has been safely terminated.</p>
+            <button onclick="location.reload()">Return to Home</button>
+        </div>
+    `;
+}
+
+
+</script>
+
+</body>
+</html>
